@@ -8,16 +8,34 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var currentView: AppView = .welcome
+    @EnvironmentObject var workoutManager: WorkoutManager
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack {
+            switch currentView {
+            case .welcome:
+                WelcomeView(currentView: $currentView)
+            case .workoutSettings:
+                WorkoutSettingsView(currentView: $currentView)
+            case .workoutLog:
+                WorkoutLogView(currentView: $currentView)
+            case .summary:
+                SummaryView(currentView: $currentView)
+            case .history:
+                HistoryView(currentView: $currentView)
+            }
         }
-        .padding()
+        .onReceive(NotificationCenter.default.publisher(for: .playCheckpointSound)) { _ in
+            // nothing here; AudioManager handles playback via separate environment object if you prefer
+        }
+        .onAppear {
+            // prepare if needed
+        }
     }
 }
+
+enum AppView { case welcome, workoutSettings, workoutLog, summary, history }
 
 #Preview {
     ContentView()
