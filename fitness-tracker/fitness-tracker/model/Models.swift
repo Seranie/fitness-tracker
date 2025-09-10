@@ -8,6 +8,8 @@
 import Foundation
 import CoreLocation
 import UIKit
+import SwiftUI
+
 
 enum WorkoutType: String, Codable, CaseIterable, Identifiable {
     case cycling, running, walking
@@ -18,6 +20,28 @@ enum WorkoutType: String, Codable, CaseIterable, Identifiable {
         case .running: return "Running"
         case .walking: return "Walking"
         }
+    }
+    
+    var iconName: String {
+        switch self {
+        case .running: return "figure.run"
+        case .cycling: return "bicycle"
+        case .walking: return "figure.walk"
+        }
+    }
+    
+    // Background colors per workout type
+    var backgroundColor: Color {
+        switch self {
+        case .running: return .indigo.opacity(0.2)
+        case .cycling: return .blue.opacity(0.2)
+        case .walking: return .green.opacity(0.2)
+        }
+    }
+    
+    // Header text per workout type
+    var headerTitle: String {
+        "\(displayName) Settings"
     }
 }
 
