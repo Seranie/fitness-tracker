@@ -12,3 +12,17 @@ extension FloatingPoint {
         return min(max(self, range.lowerBound), range.upperBound)
     }
 }
+
+extension WorkoutManager {
+    // returns a Workout struct built from the current session in memory
+    var lastSessionInMemory: Workout {
+        Workout(
+            type: currentWorkoutType,
+            duration: duration,
+            distanceMeters: distanceMeters,
+            calories: calories,
+            date: Date(),
+            score: score
+        )
+    }
+}
