@@ -19,7 +19,6 @@ struct WorkoutLogView: View {
                 .contentShape(Rectangle())
                 .gesture(doubleTapGesture)
                 .gesture(longPressGesture)
-                .highPriorityGesture(dragGesture) // detect swipes
             
             // UI overlay
             VStack {
@@ -145,20 +144,6 @@ struct WorkoutLogView: View {
             .onEnded {
                 workoutManager.completeWorkout()
                 // navigation will be triggered via didFinish observer
-            }
-    }
-    
-    var dragGesture: some Gesture {
-        DragGesture(minimumDistance: 30, coordinateSpace: .local)
-            .onEnded { value in
-                let horiz = value.translation.width
-                if abs(horiz) > 40 {
-                    if horiz < 0 {
-                        workoutManager.switchWorkout(direction: .left)
-                    } else {
-                        workoutManager.switchWorkout(direction: .right)
-                    }
-                }
             }
     }
 }
