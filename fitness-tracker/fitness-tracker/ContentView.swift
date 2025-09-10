@@ -22,15 +22,8 @@ struct ContentView: View {
                 WorkoutLogView(currentView: $currentView)
             case .summary:
                 SummaryView(currentView: $currentView)
-            case .history:
-                HistoryView(currentView: $currentView)
+
             }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .playCheckpointSound)) { _ in
-            // nothing here; AudioManager handles playback via separate environment object if you prefer
-        }
-        .onAppear {
-            // prepare if needed
         }
     }
 }
