@@ -53,18 +53,6 @@ final class WorkoutManager: NSObject, ObservableObject {
         isPaused.toggle()
     }
 
-    func switchWorkout(direction: SwipeDirection) {
-        // simple cyclic switch
-        let all = WorkoutType.allCases
-        guard let idx = all.firstIndex(of: currentWorkoutType) else { return }
-        let newIndex: Int
-        switch direction {
-        case .left: newIndex = (idx + 1) % all.count
-        case .right: newIndex = (idx - 1 + all.count) % all.count
-        }
-        currentWorkoutType = all[newIndex]
-    }
-
     // call this from the view's .onReceive(timer)
     func updateProgressTick() {
         guard isActive, !isPaused else { return }
