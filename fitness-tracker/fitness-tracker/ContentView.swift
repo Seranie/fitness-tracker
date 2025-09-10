@@ -17,7 +17,13 @@ struct ContentView: View {
             case .welcome:
                 WelcomeView(currentView: $currentView)
             case .workoutSettings:
-                WorkoutSettingsView(currentView: $currentView)
+                if !workoutManager.isActive {
+                    WorkoutSettingsView(currentView: $currentView)
+                        .environmentObject(workoutManager)
+                } else {
+                    WorkoutLogView(currentView: $currentView)
+                        .environmentObject(workoutManager)
+                }
             case .workoutLog:
                 WorkoutLogView(currentView: $currentView)
             case .summary:
@@ -28,7 +34,7 @@ struct ContentView: View {
     }
 }
 
-enum AppView { case welcome, workoutSettings, workoutLog, summary, history }
+enum AppView { case welcome, workoutSettings, workoutLog, summary }
 
 #Preview {
     ContentView()
