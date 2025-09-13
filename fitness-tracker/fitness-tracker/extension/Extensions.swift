@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SceneKit
 
 extension FloatingPoint {
     func clamped(to range: ClosedRange<Self>) -> Self {
@@ -22,7 +23,17 @@ extension WorkoutManager {
             distanceMeters: distanceMeters,
             calories: calories,
             date: Date(),
-            score: score
+            score: score,
+            checkpointsCollected: checkpointsCollected
         )
+    }
+}
+
+extension SCNVector3 {
+    static func - (lhs: SCNVector3, rhs: SCNVector3) -> SCNVector3 {
+        SCNVector3(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z)
+    }
+    var length: Float {
+        sqrt(x*x + y*y + z*z)
     }
 }
