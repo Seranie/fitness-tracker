@@ -13,6 +13,10 @@ struct WorkoutLogView: View {
        
     var body: some View {
         ZStack {
+            // AR content
+            ARWorkoutView()
+                .edgesIgnoringSafeArea(.all)
+                .environmentObject(workoutManager)
             
             // transparent overlay to capture SwiftUI gestures above the ARView
             Color.clear
@@ -22,6 +26,8 @@ struct WorkoutLogView: View {
             
             // UI overlay
             VStack {
+                CheckpointOverlay()
+                    .environmentObject(workoutManager)
                 HStack {
                     Text(workoutManager.currentWorkoutType.displayName)
                         .font(.headline)
@@ -95,7 +101,7 @@ struct WorkoutLogView: View {
                 }
                 .padding(.bottom, 28)
             } // VStack
-            .padding(.vertical, 40)
+            .padding(.vertical, 20)
         } // ZStack
         .onReceive(workoutManager.timer) { _ in
             workoutManager.updateProgressTick()
