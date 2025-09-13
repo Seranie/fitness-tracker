@@ -10,7 +10,12 @@ import SwiftUI
 @main
 struct fitness_trackerApp: App {
     @StateObject private var workoutManager = WorkoutManager()
-
+    
+    init() {
+        RotationComponent.registerComponent()
+        CheckpointComponent.registerComponent()
+    }
+	
     var body: some Scene {
         WindowGroup {
             ContentView()
