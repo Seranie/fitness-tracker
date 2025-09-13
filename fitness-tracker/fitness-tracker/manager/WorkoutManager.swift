@@ -7,8 +7,10 @@
 
 import Foundation
 import Combine
+import CoreLocation
+import MapKit
 
-final class WorkoutManager: NSObject, ObservableObject {
+final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     // public state for UI binding
     @Published var currentWorkoutType: WorkoutType = .running
     @Published var targetTime: TimeInterval = 30 * 60 // default 30 minutes (user-settable)
@@ -21,15 +23,24 @@ final class WorkoutManager: NSObject, ObservableObject {
     @Published var isActive: Bool = false
     @Published var didFinish: Bool = false
     @Published var checkpointsCollected: Int = 0
+    @Published var nextCheckpointInfo: String = ""
     
-
+    let routeManager = RouteManager()
+    private var lastLocation: CLLocation?
+    
     // internal
     private let weightKg = 70.0 // Used for rough calorie estimate - consider making user-configurable
-    let requiredCheckpoints = 1
     
     // timer publisher (view should call .onReceive(workoutManager.timer) to drive updateProgress())
     let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
-
+    
+    override init() {
+        super.init()
+        // Sync RouteManager's nextCheckpointInfo
+        routeManager.$nextCheckpointInfo
+            .assign(to: &$nextCheckpointInfo)
+    }
+    
     // MARK: - Session control
     func prepareForNewSession() {
         progress = 0
@@ -40,21 +51,38 @@ final class WorkoutManager: NSObject, ObservableObject {
         checkpointsCollected = 0
         isPaused = false
         didFinish = false
+        lastLocation = nil
+        routeManager.stopRoute()
     }
 
     func startSession() {
         prepareForNewSession()
         isActive = true
         isPaused = false
+        routeManager.startRoute()
+        // Update distance from RouteManager
+        routeManager.$currentLocation
+            .sink { [weak self] location in
+                guard let self = self, let location = location else { return }
+                self.distanceMeters += self.routeManager.distanceSince(self.lastLocation)
+                self.lastLocation = location
+            }
+            .store(in: &cancellables)
     }
 
     func stopSession() {
         isActive = false
+        routeManager.stopRoute()
     }
 
     func togglePause() {
         guard isActive else { return }
         isPaused.toggle()
+        if isPaused {
+            routeManager.stopRoute()
+        } else {
+            routeManager.startRoute()
+        }
     }
 
     // call this from the view's .onReceive(timer)
@@ -126,6 +154,8 @@ final class WorkoutManager: NSObject, ObservableObject {
         score += 50 // immediate reward
     }
     
+    private var cancellables = Set<AnyCancellable>()
+
 }
 
 
