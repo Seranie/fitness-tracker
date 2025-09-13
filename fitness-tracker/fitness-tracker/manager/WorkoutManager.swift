@@ -20,10 +20,13 @@ final class WorkoutManager: NSObject, ObservableObject {
     @Published var score: Int = 0
     @Published var isActive: Bool = false
     @Published var didFinish: Bool = false
+    @Published var checkpointsCollected: Int = 0
+    
 
     // internal
     private let weightKg = 70.0 // Used for rough calorie estimate - consider making user-configurable
-
+    let requiredCheckpoints = 1
+    
     // timer publisher (view should call .onReceive(workoutManager.timer) to drive updateProgress())
     let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
 
@@ -34,6 +37,7 @@ final class WorkoutManager: NSObject, ObservableObject {
         distanceMeters = 0
         calories = 0
         score = 0
+        checkpointsCollected = 0
         isPaused = false
         didFinish = false
     }
@@ -107,14 +111,21 @@ final class WorkoutManager: NSObject, ObservableObject {
             distanceMeters: distanceMeters,
             calories: calories,
             date: Date(),
-            score: score
+            score: score,
+            checkpointsCollected: checkpointsCollected
         )
 
         // signal UI to navigate to summary (caller/view should observe didFinish)
         didFinish = true
     }
 
-  
+    // MARK: - Checkpoints
+    func collectCheckpoint(id: String? = nil) {
+        guard isActive else { return }
+        checkpointsCollected += 1
+        score += 50 // immediate reward
+    }
+    
 }
 
 

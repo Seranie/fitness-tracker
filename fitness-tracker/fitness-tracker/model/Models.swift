@@ -53,4 +53,5 @@ struct Workout: Identifiable, Codable {
     var calories: Double
     var date: Date
     var score: Int
+    var checkpointsCollected: Int
 }
