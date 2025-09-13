@@ -17,17 +17,17 @@ struct WorkoutLogView: View {
             ARWorkoutView()
                 .edgesIgnoringSafeArea(.all)
                 .environmentObject(workoutManager)
-            
-            // transparent overlay to capture SwiftUI gestures above the ARView
-            Color.clear
-                .contentShape(Rectangle())
-                .gesture(doubleTapGesture)
-                .gesture(longPressGesture)
-            
             // UI overlay
             VStack {
-                CheckpointOverlay()
-                    .environmentObject(workoutManager)
+                HStack {
+                    CheckpointOverlay()
+                        .environmentObject(workoutManager)
+                    if !workoutManager.nextCheckpointInfo.isEmpty {
+                        Text(workoutManager.nextCheckpointInfo)
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                    }
+                }
                 HStack {
                     Text(workoutManager.currentWorkoutType.displayName)
                         .font(.headline)
@@ -58,6 +58,14 @@ struct WorkoutLogView: View {
                                 .foregroundColor(.secondary)
                         }
                     )
+                
+                HStack {
+                    Spacer()
+                    MapView(routeManager: workoutManager.routeManager)
+                        .frame(width: 100, height: 100)
+                        .cornerRadius(12)
+                        .padding(.trailing)
+                }
                 
                 HStack(spacing: 16) {
                     Button {
@@ -101,7 +109,7 @@ struct WorkoutLogView: View {
                 }
                 .padding(.bottom, 28)
             } // VStack
-            .padding(.vertical, 20)
+//            .padding(.vertical, 20)
         } // ZStack
         .onReceive(workoutManager.timer) { _ in
             workoutManager.updateProgressTick()
@@ -135,22 +143,6 @@ struct WorkoutLogView: View {
         let minutes = Int(workoutManager.duration) / 60
         let seconds = Int(workoutManager.duration) % 60
         return String(format: "%02d:%02d", minutes, seconds)
-    }
-    
-    // Gestures
-    var longPressGesture: some Gesture {
-        LongPressGesture(minimumDuration: 0.6)
-            .onEnded { _ in
-                workoutManager.togglePause()
-            }
-    }
-    
-    var doubleTapGesture: some Gesture {
-        TapGesture(count: 2)
-            .onEnded {
-                workoutManager.completeWorkout()
-                // navigation will be triggered via didFinish observer
-            }
     }
 }
 
