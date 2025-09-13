@@ -53,6 +53,7 @@ struct ARWorkoutView: UIViewRepresentable {
     class Coordinator: NSObject, ARSessionDelegate {
         var workoutManager: WorkoutManager
         var checkpoints: [ModelEntity] = []
+        weak var arView: ARView?
         
         init(workoutManager: WorkoutManager) {
             self.workoutManager = workoutManager
