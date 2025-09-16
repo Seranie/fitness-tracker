@@ -54,4 +54,21 @@ struct Workout: Identifiable, Codable {
     var date: Date
     var score: Int
     var checkpointsCollected: Int
+    var selfieFilename: String?
+    
+    private var coords: [Coord]
+    var routeCoordinates: [CLLocationCoordinate2D] {
+        coords.map { .init(latitude: $0.lat, longitude: $0.lon) }
+    }
+    
+    init(type: WorkoutType, duration: TimeInterval, distanceMeters: Double,
+         calories: Double, date: Date, score: Int, checkpointsCollected: Int,
+         selfieFilename: String? = nil, routeCoordinates: [CLLocationCoordinate2D]) {
+        self.type = type; self.duration = duration; self.distanceMeters = distanceMeters
+        self.calories = calories; self.date = date; self.score = score
+        self.checkpointsCollected = checkpointsCollected; self.selfieFilename = selfieFilename
+        self.coords = routeCoordinates.map { Coord(lat: $0.latitude, lon: $0.longitude) }
+    }
+    
+    struct Coord: Codable { var lat, lon: Double }
 }
