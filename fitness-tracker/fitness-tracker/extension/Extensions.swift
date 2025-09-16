@@ -17,8 +17,7 @@ extension FloatingPoint {
 }
 
 extension WorkoutManager {
-    // returns a Workout struct built from the current session in memory
-    var lastSessionInMemory: Workout {
+    func buildWorkoutFromSession() -> Workout {
         Workout(
             type: currentWorkoutType,
             duration: duration,
@@ -26,7 +25,9 @@ extension WorkoutManager {
             calories: calories,
             date: Date(),
             score: score,
-            checkpointsCollected: checkpointsCollected
+            checkpointsCollected: checkpointsCollected,
+            selfieFilename: capturedSelfieFilename,
+            routeCoordinates: liveTrack
         )
     }
 }
