@@ -11,14 +11,14 @@ import MapKit
 
 final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     @Published var routeCheckpoints: [CLLocationCoordinate2D] = []
-    @Published var nextCheckpointInfo: String = "" // e.g., "Checkpoint #1: 50m ahead"
-    @Published var routeDistance: Double = 0.0 // Total route distance in meters
-    @Published var currentLocation: CLLocation? // Latest user location
+    @Published var nextCheckpointInfo: String = "" // e.g. "checkpoint #1: 50m ahead"
+    @Published var routeDistance: Double = 0.0 // distance in meters
+    @Published var currentLocation: CLLocation? // latest user location
     
     private let locationManager = CLLocationManager()
     var route: MKRoute?
     private var pendingCheckpointIndices: Set<Int> = []
-    private let checkpointProximity: CLLocationDistance = 20.0 // Spawn when <20m
+    private let checkpointProximity: CLLocationDistance = 20.0 // spawn when within 20m
     let requiredCheckpoints = 3
     
     override init() {
@@ -49,13 +49,13 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
     private func generateRoute() {
         guard let start = locationManager.location?.coordinate else { return }
         
-        // Create a 3-point loop (~200m total)
+        // 3 point loop ~200m
         let segmentDistance: CLLocationDistance = 70.0
         let waypoints = [
             start,
-            offsetCoordinate(start, bearing: 0.0, distance: segmentDistance), // North
-            offsetCoordinate(start, bearing: 120.0 * .pi / 180, distance: segmentDistance), // SE
-            offsetCoordinate(start, bearing: 240.0 * .pi / 180, distance: segmentDistance) // SW
+            offsetCoordinate(start, bearing: 0.0, distance: segmentDistance),
+            offsetCoordinate(start, bearing: 120.0 * .pi / 180, distance: segmentDistance),
+            offsetCoordinate(start, bearing: 240.0 * .pi / 180, distance: segmentDistance)
         ]
         
         routeCheckpoints = waypoints
@@ -72,7 +72,7 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
             }
         }
         
-        // Chain segments: start -> 1 -> 2 -> 3
+        // chain route segments
         for i in 1..<waypoints.count {
             fetchRouteSegment(from: lastCoord, to: waypoints[i]) { [weak self] route in
                 guard let route = route else { return }
@@ -95,12 +95,11 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
         return CLLocationCoordinate2D(latitude: newLat * 180 / .pi, longitude: newLon * 180 / .pi)
     }
     
-    // MARK: - CLLocationManagerDelegate
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let newLocation = locations.last else { return }
         currentLocation = newLocation
         
-        // Check proximity for spawning
+        // check proximity for spawning checkpoint
         for (index, coord) in routeCheckpoints.enumerated() where pendingCheckpointIndices.contains(index) {
             let target = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
             let distance = newLocation.distance(from: target)
@@ -110,12 +109,11 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
                     self.pendingCheckpointIndices.remove(index)
                     NotificationCenter.default.post(name: .spawnCheckpoint, object: index)
                 }
-                break // One at a time
+                break
             }
         }
     }
     
-    // Helper for WorkoutManager
     func distanceSince(_ lastLocation: CLLocation?) -> Double {
         guard let newLocation = currentLocation, let last = lastLocation else { return 0.0 }
         return newLocation.distance(from: last)

@@ -12,7 +12,6 @@ final class PersistenceManager {
     static let shared = PersistenceManager()
     private init() {}
     
-    // MARK: - Workouts
     static let workoutsKey = "workouts_v2"
 
     var workouts: [Workout] {
@@ -32,7 +31,6 @@ final class PersistenceManager {
         UserDefaults.standard.set(try? JSONEncoder().encode(all), forKey: PersistenceManager.workoutsKey)
     }
     
-    // MARK: - Images
     @discardableResult
     func saveImageToDocuments(_ image: UIImage) -> String? {
         guard let data = image.jpegData(compressionQuality: 0.85) else { return nil }

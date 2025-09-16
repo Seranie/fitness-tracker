@@ -8,12 +8,10 @@
 import RealityKit
 import UIKit
 
-// MARK: - Rotation Component
 struct RotationComponent: Component {
     var speed: Float // radians per second
 }
 
-// MARK: - Checkpoint Component
 struct CheckpointComponent: Component {
     let baseColor: UIColor = .orange
     let midColor: UIColor = .yellow
@@ -28,9 +26,9 @@ struct CheckpointComponent: Component {
     let mediumDistance: Float = 3.5
     
     init() {
-        self.baseMaterial = SimpleMaterial(color: .orange, isMetallic: false)  // Or your base color
-        self.midMaterial = SimpleMaterial(color: .yellow, isMetallic: false)  // e.g., mid-range color
-        self.closeMaterial = SimpleMaterial(color: .green, isMetallic: false)  // e.g., close color
+        self.baseMaterial = SimpleMaterial(color: .orange, isMetallic: false)
+        self.midMaterial = SimpleMaterial(color: .yellow, isMetallic: false)
+        self.closeMaterial = SimpleMaterial(color: .green, isMetallic: false)
         self.currentMaterial = baseMaterial
     }
 }

@@ -47,9 +47,6 @@ struct ARWorkoutView: UIViewRepresentable {
         Coordinator(workoutManager: workoutManager)
     }
     
-    
-    
-    // MARK: - Coordinator
     class Coordinator: NSObject, ARSessionDelegate {
         var workoutManager: WorkoutManager
         var checkpoints: [ModelEntity] = []
@@ -58,7 +55,6 @@ struct ARWorkoutView: UIViewRepresentable {
         init(workoutManager: WorkoutManager) {
             self.workoutManager = workoutManager
         }
-        
         
         private func makeCheckpointEntity(index: Int) -> ModelEntity {
             let checkpoint = ModelEntity(
@@ -102,17 +98,17 @@ struct ARWorkoutView: UIViewRepresentable {
             let distance = currentLoc.distance(from: targetLoc)
             let bearing = currentLoc.coordinate.bearing(to: targetCoord)
             
-            // Convert to AR space (simplified approach)
+            // Convert to AR space
             let cameraTransform = frame.camera.transform
-            let arDistance = Float(min(distance, 10.0)) // Cap distance for AR visibility
+            let arDistance = Float(min(distance, 10.0)) // Cap distance for ARKit's visibility
             
-            // Create transformation relative to camera
+            // Create transformation relative to camera position
             var translation = matrix_identity_float4x4
             translation.columns.3.z = -arDistance // Place in front of camera
             
-            // Convert geographic bearing to AR rotation (this is the tricky part)
-            // For simplicity, we'll use device heading to adjust the bearing
-            let deviceHeading = Float(frame.camera.eulerAngles.y) // Camera's yaw in radians
+            // Convert geographic bearing to AR rotation
+            // Will use device heading to adjust the bearing
+            let deviceHeading = Float(frame.camera.eulerAngles.y) // Camera yaw in radians
             let relativeBearing = Float(bearing) - deviceHeading
             
             let rotation = simd_float4x4(SCNMatrix4MakeRotation(relativeBearing, 0, 1, 0))
@@ -146,7 +142,7 @@ struct ARWorkoutView: UIViewRepresentable {
                 
                 let distance = simd_distance(camPos, entity.position(relativeTo: nil)) // World position
                 
-                // Adjust color and rotation speed based on proximity
+                // Adjust color based on proximity
                 let newMaterial: SimpleMaterial
                 if distance < checkpointComp.closeDistance {
                     newMaterial = checkpointComp.closeMaterial
@@ -187,12 +183,12 @@ struct ARWorkoutView: UIViewRepresentable {
                 return
             }
             
-            // Success: Collect the checkpoint
+            // Collect the checkpoint
             entity.scale = SIMD3<Float>(0.001, 0.001, 0.001)
             entity.removeFromParent()
             workoutManager.collectCheckpoint()
             
-            // Optional: Success feedback
+            // Vibration feedback
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
         }
@@ -202,10 +198,10 @@ struct ARWorkoutView: UIViewRepresentable {
         }
         
         @objc func handleLongPress(_ recognizer: UILongPressGestureRecognizer) {
-            guard recognizer.state == .began else { return } // Only trigger on press, not release
+            guard recognizer.state == .began else { return }
             workoutManager.togglePause()
             
-            // Optional haptic feedback
+            // Vibration feedback
             let generator = UIImpactFeedbackGenerator(style: .heavy)
             generator.impactOccurred()
         }

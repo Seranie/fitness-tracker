@@ -13,11 +13,11 @@ struct WorkoutLogView: View {
        
     var body: some View {
         ZStack {
-            // AR content
+            // ARKit view
             ARWorkoutView()
                 .edgesIgnoringSafeArea(.all)
                 .environmentObject(workoutManager)
-            // UI overlay
+            // UI overlay for ARKit
             VStack {
                 HStack {
                     CheckpointOverlay()
@@ -35,7 +35,7 @@ struct WorkoutLogView: View {
                         .background(.ultraThinMaterial)
                         .cornerRadius(8)
                     Spacer()
-                    // Pause indicator
+                    // Paused indicator
                     Text(workoutManager.isPaused ? "Paused" : (workoutManager.isActive ? "Live" : "Idle"))
                         .foregroundColor(workoutManager.isPaused ? .yellow : .green)
                         .padding(8)
@@ -81,7 +81,6 @@ struct WorkoutLogView: View {
                     }
                     
                     Button {
-                        // manual finish - call manager and navigate
                         workoutManager.completeWorkout()
                         currentView = .summary
                     } label: {
@@ -93,24 +92,10 @@ struct WorkoutLogView: View {
                         .background(.ultraThinMaterial)
                         .cornerRadius(12)
                     }
-                    
-//                    Button {
-//                        // let user capture a selfie after finishing optionally
-//                        showCameraSheet = true
-//                    } label: {
-//                        VStack {
-//                            Image(systemName: "camera")
-//                            Text("Selfie")
-//                        }
-//                        .padding()
-//                        .background(.ultraThinMaterial)
-//                        .cornerRadius(12)
-//                    }
                 }
                 .padding(.bottom, 28)
-            } // VStack
-//            .padding(.vertical, 20)
-        } // ZStack
+            }
+        }
         .onReceive(workoutManager.timer) { _ in
             workoutManager.updateProgressTick()
         }
@@ -121,22 +106,6 @@ struct WorkoutLogView: View {
                 workoutManager.didFinish = false
             }
         }
-//        .sheet(isPresented: $showCameraSheet) {
-//            CameraView { image in
-//                capturedSelfie = image
-//                if let fname = PersistenceManager.shared.saveImageToDocuments(image) {
-//                    // save selfie path into most recent workout if recently completed, else store for later
-//                    // For demo: attach to last saved workout
-//                    if var latest = PersistenceManager.shared.workouts.first {
-//                        var updated = latest
-//                        updated.selfieFilename = fname
-//                        PersistenceManager.shared.workouts[0] = updated
-//                        PersistenceManager.shared.persistAll()
-//                    }
-//                }
-//                showCameraSheet = false
-//            }
-//        }
     }
     
     var timeDisplay: String {

@@ -65,7 +65,7 @@ struct SummaryView: View {
                     .padding(.bottom, 8)
             }
             
-            // camera button (only if missing)
+            // camera button, only if missing no selfie yet
             if workout.selfieFilename == nil {
                 Button {
                     showCamera = true
@@ -83,7 +83,6 @@ struct SummaryView: View {
                 .padding(.bottom, 8)
             }
             
-            // existing back-home
             Button("Back Home") {
                 currentView = .welcome
             }

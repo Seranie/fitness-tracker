@@ -30,7 +30,7 @@ enum WorkoutType: String, Codable, CaseIterable, Identifiable {
         }
     }
     
-    // Background colors per workout type
+    // Background colors for each workout type
     var backgroundColor: Color {
         switch self {
         case .running: return .indigo.opacity(0.2)
@@ -39,7 +39,7 @@ enum WorkoutType: String, Codable, CaseIterable, Identifiable {
         }
     }
     
-    // Header text per workout type
+    // Header text for each workout type
     var headerTitle: String {
         "\(displayName) Settings"
     }

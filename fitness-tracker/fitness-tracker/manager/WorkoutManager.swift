@@ -11,7 +11,6 @@ import CoreLocation
 import MapKit
 
 final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    // public state for UI binding
     @Published var currentWorkoutType: WorkoutType = .running
     @Published var targetTime: TimeInterval = 30 * 60 // default 30 minutes (user-settable)
     @Published var progress: Double = 0.0 // 0..1
@@ -45,20 +44,17 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
             routeManager.requiredCheckpoints
         }
     
-    // internal
-    private let weightKg = 70.0 // Used for rough calorie estimate - consider making user-configurable
+    private let weightKg = 70.0 // for rough calorie estimate - consider making user-settable
     
-    // timer publisher (view should call .onReceive(workoutManager.timer) to drive updateProgress())
     let timer = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
     
     override init() {
         super.init()
-        // Sync RouteManager's nextCheckpointInfo
+        // sync routeManager nextCheckpointInfo
         routeManager.$nextCheckpointInfo
             .assign(to: &$nextCheckpointInfo)
     }
     
-    // MARK: - Session control
     func prepareForNewSession() {
         progress = 0
         duration = 0
@@ -80,11 +76,11 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         liveTrack.removeAll()
         hasAnnouncedFinish = false
         capturedSelfieFilename = nil
-        // Update distance from RouteManager
+        // update distance from RouteManager
         routeManager.$currentLocation
             .compactMap { $0?.coordinate }
             .sink { [weak self] coord in
-                self?.liveTrack.append(coord)          // real breadcrumb
+                self?.liveTrack.append(coord)
                 self?.distanceMeters += self?.routeManager.distanceSince(self?.lastLocation) ?? 0
                 self?.lastLocation = self?.routeManager.currentLocation
             }
@@ -106,7 +102,6 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         }
     }
 
-    // call this from the view's .onReceive(timer)
     func updateProgressTick() {
         guard isActive, !isPaused else { return }
         duration += 1
@@ -122,19 +117,18 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         calories = met * weightKg * (duration / 3600.0)
     }
 
-    // MARK: - Scoring (continuous)
     func calculateScore() -> Int {
-        // continuous scoring: closer to target (ratio -> 1.0) yields baseline; finishing earlier yields bonus (but not unlimited).
+        // continuous scoring, closer to target yields baseline score, finishing earlier yields bonus (but not unlimited).
         let ratio = duration / max(targetTime, 1.0) // 1.0 = exact
         var delta = 0
 
         if ratio <= 1.0 {
-            // early/within target: smaller ratio -> more bonus, but clamp to avoid runaway
+            // early = more bonus, but clamp to avoid too large score
             let bonusDouble = (1.0 - ratio) * 200.0
             let bonus = Int(bonusDouble.clamped(to: 0...200))
             delta += 100 + bonus // baseline 100 plus bonus proportional to how early you finished
         } else {
-            // late -> penalty grows with overshoot
+            // late = penalty grows with overshoot
             let penaltyDouble = (ratio - 1.0) * 100.0
             let penalty = Int(penaltyDouble.clamped(to: 0...200))
             delta -= penalty
@@ -143,7 +137,6 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         return delta
     }
 
-    // MARK: - Completion
     func completeWorkout() {
         guard isActive else { return }
         // finalize
@@ -152,21 +145,20 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         let finalScoreDelta = calculateScore()
         score = max(0, score + finalScoreDelta)
 
-        // build Workout model and persist
+        // build workout model and persist
         let workout = buildWorkoutFromSession()
         PersistenceManager.shared.saveWorkout(workout)
-        // signal UI to navigate to summary (caller/view should observe didFinish)
+        // signal UI to navigate to summary
         lastSessionInMemory = workout
         didFinish = true
         
         AudioFeedback.shared.play("success")
     }
 
-    // MARK: - Checkpoints
     func collectCheckpoint(id: String? = nil) {
         guard isActive else { return }
         checkpointsCollected += 1
-        score += 50 // immediate reward
+        score += 50 // immediate score reward
         AudioFeedback.shared.play("checkpoint")
     }
     
@@ -174,6 +166,4 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
 
 }
 
-
-// Supporting
 enum SwipeDirection { case left, right }

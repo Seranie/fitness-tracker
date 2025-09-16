@@ -56,7 +56,7 @@ struct WorkoutSettingsView: View {
     
     var body: some View {
         ZStack {
-            // Dynamic background based on currently-selected type
+            // background color based on currently selected type
             workoutManager.currentWorkoutType.backgroundColor
                 .ignoresSafeArea()
             
@@ -73,9 +73,7 @@ struct WorkoutSettingsView: View {
                 
                 Spacer()
                 
-                // Start / Cancel buttons
                 HStack(spacing: 12) {
-                    // Cancel
                     Button(action: {
                         // simply go back to welcome
                         currentView = .welcome
@@ -90,9 +88,8 @@ struct WorkoutSettingsView: View {
                             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.08)))
                     }
                     
-                    // Start
                     Button(action: {
-                        // lock type and start session, then navigate
+                        // start session, then navigate
                         workoutManager.startSession()
                         currentView = .workoutLog
                     }) {
@@ -105,12 +102,12 @@ struct WorkoutSettingsView: View {
                             .cornerRadius(12)
                             .shadow(radius: 4)
                     }
-                    .disabled(workoutManager.isActive) // safety: cannot start if already active
+                    .disabled(workoutManager.isActive) // cannot start if already active
                     .opacity(workoutManager.isActive ? 0.6 : 1.0)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 30)
-            } // VStack
-        } // ZStack
+            }
+        }
     }
 }

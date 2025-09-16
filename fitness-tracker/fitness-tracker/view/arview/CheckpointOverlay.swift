@@ -4,24 +4,25 @@
 //
 //  Created by Yukii on 13/9/25.
 //
+
 import SwiftUI
 import Foundation
 
 struct CheckpointOverlay: View {
     @EnvironmentObject var workoutManager: WorkoutManager
     
-    // Temporary state to show the flash message
+    // state to show the flash message
     @State private var showFlashMessage = false
     
     var body: some View {
-        // Overlay UI
+        // Overlay UI over ARView
         VStack(spacing: 8) {
             Text("Checkpoints: \(workoutManager.checkpointsCollected)/\(workoutManager.requiredCheckpoints)")
                 .font(.headline)
                 .foregroundColor(.yellow)
                 .shadow(radius: 2)
             
-            // Flash message
+            // flash message when user collects checkpoint
             if showFlashMessage {
                 Text("All checkpoints collected!")
                     .font(.headline)

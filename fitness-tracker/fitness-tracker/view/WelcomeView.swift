@@ -53,13 +53,6 @@ struct WelcomeView: View {
                         .shadow(radius: 6)
                 }.padding(.horizontal, 30)
                 
-//                Button(action: { currentView = .history }) {
-//                    Label("History", systemImage: "clock")
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .foregroundColor(.white)
-//                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.7), lineWidth: 1))
-//                }
                 Spacer()
             }
             .padding(.top, 80)
