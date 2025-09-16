@@ -64,7 +64,9 @@ struct HistoryView: View {
             
             if w.selfieFilename != nil {
                 Button(action: {
-                    expandedSelfieID = (expandedSelfieID == w.id) ? nil : w.id   // toggle
+                    withAnimation(.easeInOut(duration: 0.25)) { // Add explicit animation here
+                        expandedSelfieID = (expandedSelfieID == w.id) ? nil : w.id
+                    }
                 }) {
                     HStack {
                         Image(systemName: "camera.fill").foregroundColor(.accentColor)
@@ -87,7 +89,7 @@ struct HistoryView: View {
             }
         }
         .padding(.vertical, 4)
-//        .animation(.easeInOut(duration: 0.25), value: expandedSelfieID)
+        .animation(.easeInOut(duration: 0.25), value: expandedSelfieID)
     }
     
     private func delete(_ workout: Workout) {
