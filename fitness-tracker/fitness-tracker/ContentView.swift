@@ -28,14 +28,12 @@ struct ContentView: View {
                 WorkoutLogView(currentView: $currentView)
             case .summary:
                 SummaryView(currentView: $currentView)
+            case .history:
+                HistoryView(currentView: $currentView)
 
             }
         }
     }
 }
 
-enum AppView { case welcome, workoutSettings, workoutLog, summary }
-
-#Preview {
-    ContentView()
-}
+enum AppView { case welcome, workoutSettings, workoutLog, summary, history }
