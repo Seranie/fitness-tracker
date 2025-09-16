@@ -19,7 +19,7 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
     var route: MKRoute?
     private var pendingCheckpointIndices: Set<Int> = []
     private let checkpointProximity: CLLocationDistance = 20.0 // Spawn when <20m
-    private let requiredCheckpoints = 3
+    let requiredCheckpoints = 3
     
     override init() {
         super.init()
@@ -58,7 +58,7 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
             offsetCoordinate(start, bearing: 240.0 * .pi / 180, distance: segmentDistance) // SW
         ]
         
-        routeCheckpoints.append(start) // Start point
+        routeCheckpoints = waypoints
         var lastCoord = waypoints[0]
         
         func fetchRouteSegment(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D, completion: @escaping (MKRoute?) -> Void) {
@@ -77,7 +77,6 @@ final class RouteManager: NSObject, ObservableObject, CLLocationManagerDelegate 
             fetchRouteSegment(from: lastCoord, to: waypoints[i]) { [weak self] route in
                 guard let route = route else { return }
                 DispatchQueue.main.async {
-                    self?.routeCheckpoints.append(waypoints[i])
                     self?.route = route
                     self?.routeDistance += route.distance
                 }
