@@ -32,7 +32,16 @@ struct WelcomeView: View {
                     .multilineTextAlignment(.center)
                     .foregroundColor(.white.opacity(0.9))
                     .padding(.horizontal, 20)
-                
+                Button {
+                    currentView = .history
+                } label: {
+                    Label("History", systemImage: "clock")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .foregroundColor(.white)
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.white.opacity(0.7), lineWidth: 1))
+                }
+                .padding(.horizontal, 30)
                 Button(action: { currentView = .workoutSettings }) {
                     Label("Start Workout", systemImage: "play.fill")
                         .bold()
