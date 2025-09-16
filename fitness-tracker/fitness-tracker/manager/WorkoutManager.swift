@@ -24,9 +24,26 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
     @Published var didFinish: Bool = false
     @Published var checkpointsCollected: Int = 0
     @Published var nextCheckpointInfo: String = ""
+    @Published var capturedSelfieFilename: String?
+    @Published var lastSessionInMemory: Workout = Workout(
+        type: .running,
+        duration: 0,
+        distanceMeters: 0,
+        calories: 0,
+        date: Date.distantPast,
+        score: 0,
+        checkpointsCollected: 0,
+        selfieFilename: nil,
+        routeCoordinates: []
+    )
     
+    var liveTrack: [CLLocationCoordinate2D] = []
+    private var hasAnnouncedFinish = false
     let routeManager = RouteManager()
     private var lastLocation: CLLocation?
+    var requiredCheckpoints: Int {
+            routeManager.requiredCheckpoints
+        }
     
     // internal
     private let weightKg = 70.0 // Used for rough calorie estimate - consider making user-configurable
@@ -60,12 +77,16 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         isActive = true
         isPaused = false
         routeManager.startRoute()
+        liveTrack.removeAll()
+        hasAnnouncedFinish = false
+        capturedSelfieFilename = nil
         // Update distance from RouteManager
         routeManager.$currentLocation
-            .sink { [weak self] location in
-                guard let self = self, let location = location else { return }
-                self.distanceMeters += self.routeManager.distanceSince(self.lastLocation)
-                self.lastLocation = location
+            .compactMap { $0?.coordinate }
+            .sink { [weak self] coord in
+                self?.liveTrack.append(coord)          // real breadcrumb
+                self?.distanceMeters += self?.routeManager.distanceSince(self?.lastLocation) ?? 0
+                self?.lastLocation = self?.routeManager.currentLocation
             }
             .store(in: &cancellables)
     }
@@ -99,7 +120,6 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         case .walking: met = 3.8
         }
         calories = met * weightKg * (duration / 3600.0)
-
     }
 
     // MARK: - Scoring (continuous)
@@ -133,18 +153,13 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         score = max(0, score + finalScoreDelta)
 
         // build Workout model and persist
-        let workout = Workout(
-            type: currentWorkoutType,
-            duration: duration,
-            distanceMeters: distanceMeters,
-            calories: calories,
-            date: Date(),
-            score: score,
-            checkpointsCollected: checkpointsCollected
-        )
-
+        let workout = buildWorkoutFromSession()
+        PersistenceManager.shared.saveWorkout(workout)
         // signal UI to navigate to summary (caller/view should observe didFinish)
+        lastSessionInMemory = workout
         didFinish = true
+        
+        AudioFeedback.shared.play("success")
     }
 
     // MARK: - Checkpoints
@@ -152,6 +167,7 @@ final class WorkoutManager: NSObject, ObservableObject, CLLocationManagerDelegat
         guard isActive else { return }
         checkpointsCollected += 1
         score += 50 // immediate reward
+        AudioFeedback.shared.play("checkpoint")
     }
     
     private var cancellables = Set<AnyCancellable>()
