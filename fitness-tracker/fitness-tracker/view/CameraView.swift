@@ -35,4 +35,4 @@ struct CameraView: UIViewControllerRepresentable {
         }
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) { parent.dismiss() }
     }
-}
+}	

@@ -8,7 +8,7 @@
 import SwiftUI
 
 enum Theme {
-    static var accent = Color("AccentColor") // add in asset or replace with .blue
+    static var accent = Color("AccentColor")
     static var backgroundGradient: LinearGradient {
         LinearGradient(colors: [Color.blue, Color.purple], startPoint: .topLeading, endPoint: .bottomTrailing)
     }
