@@ -34,6 +34,12 @@ struct ARWorkoutView: UIViewRepresentable {
         doubleTap.numberOfTapsRequired = 2
         arView.addGestureRecognizer(doubleTap)
         
+        let tripleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTripleTap(_:)))
+        tripleTap.numberOfTapsRequired = 3
+        arView.addGestureRecognizer(tripleTap)
+        
+        doubleTap.require(toFail: tripleTap)
+        
         let longPress = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleLongPress(_:)))
         longPress.minimumPressDuration = 0.6
         arView.addGestureRecognizer(longPress)
@@ -88,6 +94,24 @@ struct ARWorkoutView: UIViewRepresentable {
         }
         
         private func spawnCheckpoint(atIndex index: Int, in arView: ARView, frame: ARFrame) {
+            if index == 999 {
+                    let cameraTransform = frame.camera.transform
+                    var translation = matrix_identity_float4x4
+                    translation.columns.3.z = -2.0 // 2 meters in front
+                    
+                    let worldTransform = simd_mul(cameraTransform, translation)
+                    let anchor = AnchorEntity(world: worldTransform)
+                    let checkpoint = makeCheckpointEntity(index: index)
+                    anchor.addChild(checkpoint)
+                    arView.scene.addAnchor(anchor)
+                    checkpoints.append(checkpoint)
+                    
+                    // Spawn animation
+                    checkpoint.scale = SIMD3<Float>(0.001, 0.001, 0.001)
+                    checkpoint.move(to: Transform(scale: .one), relativeTo: checkpoint.parent, duration: 0.8, timingFunction: .easeOut)
+                    return
+                }
+            
             guard let currentLoc = workoutManager.routeManager.currentLocation,
                   index < workoutManager.routeManager.routeCheckpoints.count else { return }
             
@@ -125,6 +149,11 @@ struct ARWorkoutView: UIViewRepresentable {
             checkpoint.scale = SIMD3<Float>(0.001, 0.001, 0.001)
             checkpoint.move(to: Transform(scale: .one), relativeTo: checkpoint.parent, duration: 0.8, timingFunction: .easeOut)
             
+        }
+        
+        private func spawnDebugCheckpoint(in arView: ARView, frame: ARFrame) {
+            // Use a high index that won't conflict with real checkpoints
+            spawnCheckpoint(atIndex: 999, in: arView, frame: frame)
         }
         
         // ARSessionDelegate method for frame updates
@@ -205,5 +234,17 @@ struct ARWorkoutView: UIViewRepresentable {
             let generator = UIImpactFeedbackGenerator(style: .heavy)
             generator.impactOccurred()
         }
+        
+        @objc func handleTripleTap(_ recognizer: UITapGestureRecognizer) {
+            guard let arView = recognizer.view as? ARView,
+                  let currentFrame = arView.session.currentFrame else { return }
+            
+            spawnDebugCheckpoint(in: arView, frame: currentFrame)
+            
+            // Haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+        }
+
     }
 }
